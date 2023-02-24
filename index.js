@@ -14,6 +14,8 @@ const {
 	mongoose: { Types },
 } = require('./database.js')
 
+const DATE_REX = /^\d{4}-\d{2}-\d{2}$/
+
 const app = express()
 
 connect(err => {
@@ -85,10 +87,16 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 	const duration = parseInt(durationStr)
 	if (duration <= 0) return res.status(400).json({ error: 'Invalid duration' })
 	/** @type {Date} */
-	const date = !dateStr ? new Date() : new Date(dateStr)
-	if (isNaN(date)) return res.status(400).json({ error: 'Invalid date' })
+	if (dateStr && !DATE_REX.test(dateStr))
+		return res.status(400).json({ error: 'Invalid date' })
+	// unification of the date-string
+	const date = (dateStr ? new Date(dateStr) : new Date()).toDateString()
 
-	const exercise = { date, duration, description }
+	const exercise = {
+		date,
+		duration,
+		description,
+	}
 
 	try {
 		const user = await User.findById(_id)
@@ -103,7 +111,11 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 		await user.save()
 
 		console.log(`New Exercise saved for user ${username} (${_id})`)
-		return res.json({ _id, username, ...exercise, date: date.toDateString() })
+		return res.json({
+			_id,
+			username,
+			...exercise,
+		})
 	} catch (err) {
 		return handleServerError(res, err, 'Unable to post exercise')
 	}
@@ -123,12 +135,48 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 			virtuals: true,
 			versionKey: false,
 		})
+
+		const from = DATE_REX.test(req.query.from)
+			? new Date(new Date(req.query.from).toDateString())
+			: NaN
+		const to = DATE_REX.test(req.query.to)
+			? new Date(new Date(req.query.to).toDateString())
+			: NaN
+		const limit = parseInt(req.query.limit)
+		console.log(from, to, limit)
+		let filteredLogs = log
+		console.log(
+			'logs:',
+			filteredLogs.map(l => new Date(l.date))
+		)
+		if (!isNaN(from)) {
+			filteredLogs = filteredLogs.filter(l => {
+				console.log(from, l.date, from <= l.date)
+				return from <= new Date(l.date)
+			})
+			console.log(
+				'from:',
+				filteredLogs.map(l => new Date(l.date))
+			)
+		}
+		if (!isNaN(to)) {
+			filteredLogs = filteredLogs.filter(l => to >= new Date(l.date))
+			console.log(
+				'to:',
+				filteredLogs.map(l => new Date(l.date))
+			)
+		}
+		if (!isNaN(limit)) {
+			filteredLogs = filteredLogs.slice(0, limit)
+			console.log(
+				'limit:',
+				filteredLogs.map(l => new Date(l.date))
+			)
+		}
+
 		return res.json({
 			...resJson,
-			log: log.map(({ date, ...entry }) => ({
-				...entry,
-				date: date.toDateString(),
-			})),
+			log: filteredLogs,
 		})
 	} catch (err) {
 		return handleServerError(res, err, 'Unable to get logs')

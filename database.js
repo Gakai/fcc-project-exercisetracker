@@ -16,7 +16,7 @@ const ExerciseSchema = new Schema(
 	{
 		description: { type: String, required: true, minLength: 3 },
 		duration: { type: Number, required: true, min: 1 },
-		date: { type: Date, required: true },
+		date: { type: String, required: true },
 	},
 	{ _id: false }
 )
