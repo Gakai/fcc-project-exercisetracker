@@ -136,6 +136,7 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 			versionKey: false,
 		})
 
+		// Query filtering
 		const from = DATE_REX.test(req.query.from)
 			? new Date(new Date(req.query.from).toDateString())
 			: NaN
@@ -145,33 +146,14 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 		const limit = parseInt(req.query.limit)
 		console.log(from, to, limit)
 		let filteredLogs = log
-		console.log(
-			'logs:',
-			filteredLogs.map(l => new Date(l.date))
-		)
 		if (!isNaN(from)) {
-			filteredLogs = filteredLogs.filter(l => {
-				console.log(from, l.date, from <= l.date)
-				return from <= new Date(l.date)
-			})
-			console.log(
-				'from:',
-				filteredLogs.map(l => new Date(l.date))
-			)
+			filteredLogs = filteredLogs.filter(l => from <= new Date(l.date))
 		}
 		if (!isNaN(to)) {
 			filteredLogs = filteredLogs.filter(l => to >= new Date(l.date))
-			console.log(
-				'to:',
-				filteredLogs.map(l => new Date(l.date))
-			)
 		}
 		if (!isNaN(limit)) {
 			filteredLogs = filteredLogs.slice(0, limit)
-			console.log(
-				'limit:',
-				filteredLogs.map(l => new Date(l.date))
-			)
 		}
 
 		return res.json({
