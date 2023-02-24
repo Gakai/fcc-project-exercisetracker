@@ -84,10 +84,11 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 		return res.status(400).json({ error: 'Description too short' })
 	if (parseInt(duration) <= 0)
 		return res.status(400).json({ error: 'Invalid duration' })
+	/** @type {Date} */
 	const date = !dateStr ? new Date() : new Date(dateStr)
 	if (isNaN(date)) return res.status(400).json({ error: 'Invalid date' })
 
-	const exercise = { description, duration, date }
+	const exercise = { date, duration, description }
 
 	try {
 		const user = await User.findById(_id)
@@ -97,11 +98,12 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 		}
 		const username = user.username
 
+		console.log(exercise)
 		user.log.push(exercise)
 		await user.save()
 
 		console.log(`New Exercise saved for user ${username} (${_id})`)
-		return res.json({ _id, username, ...exercise })
+		return res.json({ _id, username, ...exercise, date: date.toDateString() })
 	} catch (err) {
 		return handleServerError(res, err, 'Unable to post exercise')
 	}
@@ -117,11 +119,17 @@ app.get('/api/users/:_id/logs', async (req, res) => {
 			console.log('User not found:', _id)
 			return res.json({ error: 'Unknown user id' })
 		}
-		const { id, ...resJson } = user.toObject({
+		const { id, log, ...resJson } = user.toObject({
 			virtuals: true,
 			versionKey: false,
 		})
-		return res.json(resJson)
+		return res.json({
+			...resJson,
+			log: log.map(({ date, ...entry }) => ({
+				...entry,
+				date: date.toDateString(),
+			})),
+		})
 	} catch (err) {
 		return handleServerError(res, err, 'Unable to get logs')
 	}
