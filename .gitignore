@@ -1,5 +1,7 @@
 .env
 node_modules
 
+# IDE specifics
+.vscode/
 .replit
 replit.nix

@@ -12,40 +12,34 @@ function connect(callback) {
 	)
 }
 
-const userSchema = new Schema({
-	username: String,
-})
+const ExerciseSchema = new Schema(
+	{
+		description: { type: String, required: true, minLength: 3 },
+		duration: { type: Number, required: true, min: 1 },
+		date: { type: Date, required: true },
+	},
+	{ _id: false }
+)
+
+const userSchema = new Schema(
+	{
+		username: { type: String, required: true, minLength: 1 },
+		log: [ExerciseSchema],
+	},
+	{
+		virtuals: {
+			count: {
+				get() {
+					return this.log.length
+				},
+			},
+		},
+	}
+)
 const User = model('User', userSchema)
 
-const exerciseSchema = new Schema({
-	username: String,
-	description: String,
-	duration: Number,
-	date: Date,
-})
-const Exercise = model('Exercise', exerciseSchema)
-
-// const logEntrySchema = new Schema({
-// 	description: String,
-// 	duration: Number,
-// 	date: Date,
-// })
-const logSchema = new Schema({
-	username: String,
-	count: Number,
-	log: [
-		{
-			description: String,
-			duration: Number,
-			date: Date,
-		},
-	],
-})
-const Log = model('Log', logSchema)
-
 module.exports = {
+	mongoose,
 	connect,
-	Log,
 	User,
-	Exercise,
 }
