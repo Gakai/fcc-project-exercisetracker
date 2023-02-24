@@ -11,7 +11,7 @@ const { requestLogger } = require('./mymiddleware.js')
 const {
 	connect,
 	User,
-	mongoose: { Types, MongooseError },
+	mongoose: { Types },
 } = require('./database.js')
 
 const app = express()
@@ -34,7 +34,7 @@ app.use(bodyParser.urlencoded({ extended: false }))
 app.use('/api', requestLogger())
 
 function handleServerError(res, err, msg) {
-	if (err instanceof MongooseError) console.log(err.name, err.message)
+	if (err instanceof Error) console.log(err.name, err.message)
 	else console.log(err)
 	return res.status(500).json({ error: msg })
 }
