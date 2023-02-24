@@ -78,12 +78,12 @@ app.post('/api/users/:_id/exercises', async (req, res) => {
 	if (!validateId(res, _id)) return
 
 	// FormData validation
-	const { description, duration, date: dateStr } = req.body
-	console.log(`New Ex: '${description}' ${duration || '?'}m at '${dateStr}'`)
+	const { description, duration: durationStr, date: dateStr } = req.body
+	console.log(`New Ex: '${description}' ${durationStr || '?'}m at '${dateStr}'`)
 	if (!(typeof description === 'string' && description.length > 3))
 		return res.status(400).json({ error: 'Description too short' })
-	if (parseInt(duration) <= 0)
-		return res.status(400).json({ error: 'Invalid duration' })
+	const duration = parseInt(durationStr)
+	if (duration <= 0) return res.status(400).json({ error: 'Invalid duration' })
 	/** @type {Date} */
 	const date = !dateStr ? new Date() : new Date(dateStr)
 	if (isNaN(date)) return res.status(400).json({ error: 'Invalid date' })
