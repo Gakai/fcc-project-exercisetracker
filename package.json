@@ -11,8 +11,9 @@
 		"express": "^4.16.4",
 		"cors": "^2.8.5"
 	},
+  "author": "Steffen Kutscher <fcc@skutscher.de>",
 	"repository": {
-		"url": "https://github.com/freeCodeCamp/boilerplate-project-exercisetracker"
+		"url": "https://github.com/Gakai/fcc-project-exercisetracker"
 	},
 	"license": "MIT",
 	"keywords": [

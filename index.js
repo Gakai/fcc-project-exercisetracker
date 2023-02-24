@@ -1,3 +1,5 @@
+// Boilerplate code from https://github.com/freeCodeCamp/boilerplate-project-exercisetracker
+
 const express = require('express')
 const app = express()
 const cors = require('cors')
